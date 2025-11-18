@@ -11,7 +11,7 @@ import SwiftUI
 struct InstrumentsAnalyserApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            RouterView()
         }
     }
 }
