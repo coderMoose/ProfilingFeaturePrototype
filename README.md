@@ -1,4 +1,3 @@
-# README
 ### Demo
 https://github.com/user-attachments/assets/759581d4-e109-4871-979a-763cb66848f2
 
@@ -15,7 +14,7 @@ After the alert, the dev tool would then prepare an AI-generated summary of the 
 
 A feature like this would make profiling more accessible to beginners who may not have used tools like Instruments before.
 
-### Technical details
+### Technical Details
 So how does this work technically? Let's go step by step:
 - The 100% CPU button starts a for-loop that runs 1 million times, attempting to spike the CPU with print statements at every 100k interval.
 - Once the button is pressed, an xctrace recording is started in the background by making a new Process(). The arguments passed to the process are as follows:
