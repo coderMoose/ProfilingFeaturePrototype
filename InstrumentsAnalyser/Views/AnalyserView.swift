@@ -20,6 +20,8 @@ struct AnalyserView: View {
             HStack {
                 Spacer()
                 Text("Analysing App Trace")
+                    .font(.title)
+                    .bold()
                 Spacer()
             }
             Spacer()
@@ -28,9 +30,12 @@ struct AnalyserView: View {
                     .rotationEffect(isRotating ? .degrees(0) :.degrees(360))
                     .font(.custom("robotImage", size: 80))
             } else {
-                Text(summary)
-                    .font(.title3)
-                    .foregroundStyle(linearGradient)
+                ScrollView {
+                    Text(summary)
+                        .font(.body)
+                        .fontDesign(.monospaced)
+                        .foregroundStyle(.white)
+                }
             }
             Spacer()
         }.onAppear {
@@ -48,8 +53,8 @@ struct AnalyserView: View {
                 
                 let analyzer = ChatGPTXMLAnalyser()
                 let promptAnswer = """
-                I have an Apple Instruments XML file from a Time Profiler trace. I want to find the hottest frames and call paths. Please do the following:
-                
+        I have an Apple Instruments XML file from a Time Profiler trace. I want to find the hottest frames and call paths. Please do the following:
+                                
                 1. Parse the XML file and locate all <row> entries in the time-profile table.
                 2. For each row, resolve the backtrace to its sequence of frames.
                 3. Count:
@@ -62,7 +67,7 @@ struct AnalyserView: View {
                    - Frame name
                    - Number of samples it appears as the leaf
                    - Percentage of total samples
-                5. Please provide the output in a concise, readable text table including the heaviest leaf frames and their weight. Only reply with that table (a.k.a only reply with step 5 but still do step 4, etc...) along with a sentence or two summarising this for a beginner (which function is slow). 
+                5. Please provide the output in a concise, readable text table including the heaviest leaf frames and their weight. Only reply with that table (a.k.a only reply with step 5 but still do step 4, etc...). Include one sentence explaining what the hottest leaf node is caused by (a button? an HTTP request? etc...)
 """
                 
                 let answer = try await analyzer.analyzeXML(
@@ -70,8 +75,9 @@ struct AnalyserView: View {
                     prompt: promptAnswer
                 )
                 
+                
                 withAnimation {
-                    summary = answer
+                    summary = answer.replacingOccurrences(of: "```", with: "   ")
                 }
                 
                 print("ChatGPT answer:\n\(answer)")

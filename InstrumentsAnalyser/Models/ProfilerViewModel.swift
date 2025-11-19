@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 
+@MainActor
 class ProfilerViewModel: ObservableObject {
     @Published var status: ProfilerStatus = .idle
     
@@ -15,26 +16,23 @@ class ProfilerViewModel: ObservableObject {
         status = .recordingXCTrace
         let pid = ProcessInfo.processInfo.processIdentifier
         
-        // --- Application Support directory for this app ---
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory,
                                                   in: .userDomainMask).first!
         
-        // Use your app's bundle identifier as the folder name
         let bundleID = Bundle.main.bundleIdentifier ?? "MyApp"
         let folderURL = appSupport.appendingPathComponent(bundleID, isDirectory: true)
         
-        // Create folder if needed
         try? FileManager.default.createDirectory(at: folderURL,
                                                  withIntermediateDirectories: true,
                                                  attributes: nil)
         
         // Final output file
-        
         let outputURL = folderURL.appendingPathComponent("xctrace.trace")
+        
         do {
             try FileManager.default.removeItem(at: outputURL)
         } catch {
-            print("could not remove file")
+            print("Could not remove file")
         }
         
         let process = Process()
@@ -73,8 +71,6 @@ class ProfilerViewModel: ObservableObject {
             print("xctrace finished with code \(process.terminationStatus)")
             print("Output written to: \(outputURL.path)")
             
-            
-            
             Task {
                 await MainActor.run {
                     self.status = .recordingComplete
@@ -84,11 +80,9 @@ class ProfilerViewModel: ObservableObject {
         }
     }
     
-    @MainActor
     func exportTrace(tracePath: String) async {
         status = .startingExport
         
-        // Capture main-actor isolated constant to use inside Sendable closures
         let xmlTracePath = Constants.XML_TRACE_PATH
         
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory,

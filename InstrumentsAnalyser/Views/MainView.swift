@@ -32,8 +32,9 @@ struct MainView: View {
             if isAISummaryShown {
                 AnalyserView()
                     .padding()
-                    .background(RoundedRectangle(cornerRadius: 20).fill(.black.mix(with: .gray, by: 0.2)))
+                    .background(RoundedRectangle(cornerRadius: 20).fill(.black.mix(with: .gray, by: 0.4)))
                     .padding()
+                    .shadow(radius: 3)
             }
         }
     }
@@ -48,7 +49,7 @@ struct MainView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 40, height: 40)
-                        .foregroundStyle(.indigo.mix(with: .white, by: 0.2))
+                        .foregroundStyle(.yellow.mix(with: .white, by: 0.2))
                         .shadow(radius: 3)
                         .padding()
                 }.buttonStyle(.plain)
@@ -90,8 +91,6 @@ struct MainView: View {
                 .foregroundStyle(.tint)
             Text("Hello, world!")
             Button {
-                // Start recording right before causing the CPU spike
-                    
                 // Try to use 100% of the CPU
                 Task {
                     let constant = 100000000
@@ -101,6 +100,7 @@ struct MainView: View {
                         }
                     }
                 }
+                
                 profilerVM.recordXCTrace()
             } label: {
                 Text("100% CPU")
