@@ -13,7 +13,7 @@ struct RouterView: View {
     
     var body: some View {
         switch currentScreen {
-        case .analyzerScreen:
+        case .analyserScreen:
             AnalyserView()
         case .mainScreen:
             MainView()

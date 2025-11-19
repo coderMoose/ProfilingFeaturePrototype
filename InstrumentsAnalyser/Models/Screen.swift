@@ -7,6 +7,6 @@
 
 
 enum Screen {
-    case AnalyserView
+    case analyserScreen
     case mainScreen
 }
