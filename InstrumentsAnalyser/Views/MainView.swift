@@ -59,31 +59,6 @@ struct MainView: View {
         }
     }
     
-    private func startAnalysing() {
-        Task {
-            do {
-                let fileURL = URL(fileURLWithPath: Constants.XML_TRACE_PATH)
-                
-                let analyzer = ChatGPTXMLAnalyser()
-                let promptAnswer = """
-                I have an Apple Instruments XML file from a Time Profiler trace. I want to find the hottest frames and call paths. Please do the following:
-                
-               Please provide the heaviest leaf frames in a concise, readable text table including the their weight and total sample time. Only reply with that table along with a quick  summary.
-"""
-                
-                let answer = try await analyzer.analyzeXML(
-                    fileURL: fileURL,
-                    prompt: promptAnswer
-                )
-                
-                print("ChatGPT answer:\n\(answer)")
-                
-            } catch {
-                print("Error:", error)
-            }
-        }
-    }
-    
     private var mainContent: some View {
         VStack {
             Image(systemName: "globe")
