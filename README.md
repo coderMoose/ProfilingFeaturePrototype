@@ -1,8 +1,10 @@
 # README
+### Demo
+https://github.com/user-attachments/assets/759581d4-e109-4871-979a-763cb66848f2
 
 This is a prototype of a feature that I’d like to see added to development tools to help beginners detect and understand CPU spikes while testing their apps.
 
-**Description**
+### Description
 Imagine a dev tool that would automatically record an xctrace for your test app whenever it detects 100% CPU usage.
 
 It could then alert the developer about the CPU spike. 
@@ -13,7 +15,7 @@ After the alert, the dev tool would then prepare an AI-generated summary of the 
 
 A feature like this would make profiling more accessible to beginners who may not have used tools like Instruments before.
 
-**Technical details**
+### Technical details
 So how does this work technically? Let's go step by step:
 - The 100% CPU button starts a for-loop that runs 1 million times, attempting to spike the CPU with print statements at every 100k interval.
 - Once the button is pressed, an xctrace recording is started in the background by making a new Process(). The arguments passed to the process are as follows:
@@ -50,7 +52,7 @@ So how does this work technically? Let's go step by step:
 
 - Finally, the AI’s answer is decoded as a string and displayed in AnalyserView().
 
-**Next Steps:**
+### Next Steps:
 - Find a better way to send the xctrace’s XML to ChatGPT.
     - It seems XML files aren’t supported by OpenAI’s free tier API, but perhaps the Batch or Assistant modes would have more file options.
 
