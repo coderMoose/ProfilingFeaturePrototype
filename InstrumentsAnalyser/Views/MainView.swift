@@ -8,59 +8,109 @@
 import SwiftUI
 
 struct MainView: View {
+    @StateObject var profilerVM = ProfilerViewModel()
+    @State private var isLightbulbShown = false
+    @State private var isAISummaryShown = false
+    
     var body: some View {
+        ZStack {
+            VStack {
+                topBar
+                Spacer()
+                mainContent
+                Spacer()
+            }
+            .padding()
+            .onChange(of: profilerVM.status, { oldStatus, newStatus in
+                if newStatus == .exportComplete {
+                    withAnimation(.bouncy) {
+                        isLightbulbShown = true
+                    }
+                }
+            })
+            
+            if isAISummaryShown {
+                AnalyserView()
+                    .padding()
+                    .background(RoundedRectangle(cornerRadius: 20).fill(.black.mix(with: .gray, by: 0.2)))
+                    .padding()
+            }
+        }
+    }
+    
+    private var topBar: some View {
+        HStack {
+            if isLightbulbShown {
+                Button {
+                    showAISummaryView()
+                } label: {
+                    Image(systemName: "lightbulb.min.badge.exclamationmark.fill")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 40, height: 40)
+                        .foregroundStyle(.indigo.mix(with: .white, by: 0.2))
+                        .shadow(radius: 3)
+                        .padding()
+                }.buttonStyle(.plain)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+            Spacer()
+        }
+    }
+    
+    private func startAnalysing() {
+        Task {
+            do {
+                let fileURL = URL(fileURLWithPath: Constants.XML_TRACE_PATH)
+                
+                let analyzer = ChatGPTXMLAnalyser()
+                let promptAnswer = """
+                I have an Apple Instruments XML file from a Time Profiler trace. I want to find the hottest frames and call paths. Please do the following:
+                
+               Please provide the heaviest leaf frames in a concise, readable text table including the their weight and total sample time. Only reply with that table along with a quick  summary.
+"""
+                
+                let answer = try await analyzer.analyzeXML(
+                    fileURL: fileURL,
+                    prompt: promptAnswer
+                )
+                
+                print("ChatGPT answer:\n\(answer)")
+                
+            } catch {
+                print("Error:", error)
+            }
+        }
+    }
+    
+    private var mainContent: some View {
         VStack {
             Image(systemName: "globe")
                 .imageScale(.large)
                 .foregroundStyle(.tint)
             Text("Hello, world!")
             Button {
-                let constant = 100000000
-                for i in 0..<constant {
-                    if i % 1000 == 0 {
-                        print(i)
+                // Start recording right before causing the CPU spike
+                    
+                // Try to use 100% of the CPU
+                Task {
+                    let constant = 100000000
+                    for i in 0..<constant {
+                        if i % 100000 == 0 {
+                            print(i)
+                        }
                     }
                 }
+                profilerVM.recordXCTrace()
             } label: {
                 Text("100% CPU")
             }
         }
-        .padding()
-        .onAppear {
-            Task {
-                do {
-                    let fileURL = URL(fileURLWithPath: "/Users/daniel/Desktop/time_profile_data.xml")
-                    
-                    let analyzer = ChatGPTXMLAnalyser()
-                    let promptAnswer = """
-                    I have an Apple Instruments XML file from a Time Profiler trace. I want to find the hottest frames and call paths. Please do the following:
-                    
-                    1. Parse the XML file and locate all <row> entries in the time-profile table.
-                    2. For each row, resolve the backtrace to its sequence of frames.
-                    3. Count:
-                       - The total number of samples.
-                       - The occurrences of each frame anywhere in the backtrace (inclusive).
-                       - The occurrences of the leaf (deepest) frame in each backtrace.
-                       - The occurrences of exact stack paths (leaf → ... → root).
-                       - The occurrences of leaf-up prefixes (partial paths).
-                    4. Output the **heaviest leaf frames**, showing:
-                       - Frame name
-                       - Number of samples it appears as the leaf
-                       - Percentage of total samples
-                    5. Please provide the output in a concise, readable text table including the heaviest leaf frames and their weight. Only reply with that table (a.k.a only reply with step 5 but still do step 4, etc...)
-"""
-                    
-                    let answer = try await analyzer.analyzeXML(
-                        fileURL: fileURL,
-                        prompt: promptAnswer
-                    )
-                    
-                    print("ChatGPT answer:\n\(answer)")
-                    
-                } catch {
-                    print("Error:", error)
-                }
-            }
+    }
+    
+    private func showAISummaryView() {
+        withAnimation {
+            isAISummaryShown = true
         }
     }
 }
